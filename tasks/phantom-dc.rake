@@ -2,6 +2,7 @@ require File.expand_path("../../config/boot.rb", __FILE__)
 require File.expand_path("../../app/helpers/states.rb", __FILE__)
 require File.expand_path("../../app/helpers/colorize.rb", __FILE__)
 require File.expand_path("../../app/helpers/delayed_job_helper.rb", __FILE__)
+require File.expand_path("../../app/helpers/capybara_pool.rb", __FILE__)
 
 namespace :'phantom-dc' do
   namespace :'delayed_job' do

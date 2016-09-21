@@ -194,9 +194,7 @@ class CongressMember < ActiveRecord::Base
   end
 
   def fill_out_form_with_capybara f={}, driver
-    session = Capybara::Session.new(driver)
-    session.driver.options[:js_errors] = false if driver == :poltergeist
-    session.driver.options[:phantomjs_options] = ['--ssl-protocol=TLSv1'] if driver == :poltergeist
+    session = CapybaraPool.get_session(driver)
     if has_google_recaptcha?
       case driver
       when :poltergeist
@@ -334,24 +332,6 @@ class CongressMember < ActiveRecord::Base
       message = {message: e.message}
       message[:screenshot] = self.class::save_screenshot_and_store_poltergeist(session)
       raise e, YAML.dump(message)
-    ensure
-      case driver
-      when :poltergeist
-        session.driver.quit
-      when :webkit
-        # ugly, but it works
-        pid = session.driver.instance_variable_get("@browser").instance_variable_get("@connection").instance_variable_get("@pid")
-        stdin = session.driver.instance_variable_get("@browser").instance_variable_get("@connection").instance_variable_get("@pipe_stdin")
-        stdout = session.driver.instance_variable_get("@browser").instance_variable_get("@connection").instance_variable_get("@pipe_stdout")
-        stderr = session.driver.instance_variable_get("@browser").instance_variable_get("@connection").instance_variable_get("@pipe_stderr")
-        socket = session.driver.instance_variable_get("@browser").instance_variable_get("@connection").instance_variable_get("@socket")
-
-        stdin.close
-        stdout.close
-        stderr.close
-        socket.close
-        Process.kill(3, pid)
-      end
     end
   end
 
